@@ -1,5 +1,7 @@
 package com.main.Test9.Exception;
 
+ import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+ 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,9 +19,18 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobleExceptionHandler {
 	
+	private final static Logger logger = LoggerFactory.getLogger(GlobleExceptionHandler.class);
+	
 	@ExceptionHandler(ProductFetchException.class)
 	public ResponseEntity<String> productFetechException(ProductFetchException ex){
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ex.getMessage());
+	}
+	
+	@ExceptionHandler(UnauthorizedException.class)
+	public ResponseEntity<String> unauthorizedException(UnauthorizedException ex){
+		  logger.error("Unauthorized access: {}", ex.getMessage());
+		  return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+		 
 	}
 	
 	@ExceptionHandler(DuplicateProductException.class)

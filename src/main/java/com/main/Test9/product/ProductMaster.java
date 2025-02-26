@@ -3,6 +3,7 @@ package com.main.Test9.product;
 import javax.swing.plaf.basic.BasicSplitPaneUI.BasicVerticalLayoutManager;
 
 import org.hibernate.validator.constraints.UniqueElements;
+import org.springframework.context.annotation.Fallback;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
@@ -15,7 +16,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -26,13 +29,11 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "product")
 @XmlAccessorType(XmlAccessType.FIELD)
 @Entity
-@Table(name = "product_master")
+@Table(name = "product_master", uniqueConstraints = {@UniqueConstraint(columnNames = "fssai-No")})
 public class ProductMaster {
 	
 	public interface AdminView extends BasicView {}
 	public interface BasicView{}
-	
-	
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,19 +47,20 @@ public class ProductMaster {
 	@Column(name = "product_name",nullable = false,unique = true, length = 150)
  	private String productName;
 	
+	@Column(name = "fssai_no", nullable =  false, unique = true) 
+	private Double fssai_No;
+	
+	@NotNull(message = "Price Can not be null")
+	@Min(value = 0, message = "Price must be greater than or equals to 0")
+	@Column(name = "price")
+	private Double price;
+	
 	@JsonView(AdminView.class)
 	@Column(name = "active")
 	private boolean active;
 	public ProductMaster() {
 		super();
 		// TODO Auto-generated constructor stub
-	}
-	public ProductMaster(long productId, @NotEmpty(message = "Invalid Product Name") String productName,
-			boolean active) {
-		super();
-		this.productId = productId;
-		this.productName = productName;
-		this.active = active;
 	}
 	public long getProductId() {
 		return productId;
@@ -72,6 +74,18 @@ public class ProductMaster {
 	public void setProductName(String productName) {
 		this.productName = productName;
 	}
+	public Double getFssai_No() {
+		return fssai_No;
+	}
+	public void setFssai_No(Double fssai_No) {
+		this.fssai_No = fssai_No;
+	}
+	public Double getPrice() {
+		return price;
+	}
+	public void setPrice(Double price) {
+		this.price = price;
+	}
 	public boolean isActive() {
 		return active;
 	}
@@ -80,9 +94,13 @@ public class ProductMaster {
 	}
 	@Override
 	public String toString() {
-		return "ProductMaster [productId=" + productId + ", productName=" + productName + ", active=" + active + "]";
+		return "ProductMaster [productId=" + productId + ", productName=" + productName + ", fssai_No=" + fssai_No
+				+ ", price=" + price + ", active=" + active + "]";
 	}
 	 
+	
+	
+	
 	
 
 }

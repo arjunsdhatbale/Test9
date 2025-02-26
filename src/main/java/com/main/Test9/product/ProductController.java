@@ -14,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +26,7 @@ import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBod
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.main.Test9.JsonViewResponse;
+import com.main.Test9.Exception.UnauthorizedException;
 import com.main.Test9.product.ProductMaster.BasicView;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -55,7 +58,7 @@ public class ProductController {
 	
 	@GetMapping(value = "/",produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 	@Operation(summary = "Get All Product", description =   "Fetch all Products List.")
-	public ResponseEntity<?> getAllBasicProducts(
+	public ResponseEntity<?> getAllProducts(
 			@RequestHeader(name = "User-Role", required = false,defaultValue = "Admin") String role
 			) {
 		logger.info("Request received to fetech all Products..");
@@ -77,10 +80,10 @@ public class ProductController {
 		
 	}
 	
-	 
-	
-	@GetMapping("/searchProduct")
+	@GetMapping(value =  "/searchProduct", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+	@Operation(summary = "Get Product by Product Id or Product Name", description = "Thid method find the produt by either product id or product Name.")
 	public ResponseEntity<ProductMaster> findByProductIdOrProductName(
+			@RequestHeader(name = "User-Role",required = false,defaultValue = "Basic") String role,
 			@RequestParam(required = false) Long productId,
 			@RequestParam(required = false) String productName
 			){
@@ -92,11 +95,53 @@ public class ProductController {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}	
 	}
-	
-//	@PatchMapping("/")
-//	public ResponseEntity<T>
-	
+ 
+	@PutMapping(value = "/{productName}",produces = {MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE})
+	@Operation(summary = "Update Product",description = "This method update the comple product")
+	public ResponseEntity<ProductMaster> updateProduct(
+			@RequestHeader(name = "User-Role",required = true,defaultValue = "Admin")String role,
+			@PathVariable(required = true) String productName,
+			@Valid @RequestBody(required = true) ProductMaster productMaster
+			) throws Exception  {
+		
+		logger.info("Request received to update product.");
+		
+		if(!"Admin".equalsIgnoreCase(role)) {
+			logger.warn("Un-authorized update attempt by user with role: {}",role);
+			throw new UnauthorizedException("You do not have permission to update product");
+		}
+		ProductMaster product = productService.updateProduct(productName,productMaster);
+		
+		return ResponseEntity.status(HttpStatus.OK).body(product);
+	}
 }
+
+
+
+
+
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

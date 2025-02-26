@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.main.Test9.Exception.DuplicateProductException;
@@ -70,7 +72,31 @@ public class ProductService {
 			throw new ProductNotFoundException("Product not found.");
 		} 
 	}
-	
+ 
+	@Transactional
+	public ProductMaster updateProduct(String productName, ProductMaster productMaster) {
+ 
+		Optional<ProductMaster> updateProduct = this.productRepository.findByProductName(productName);
+		
+		if(!updateProduct.isPresent()) {
+			logger.info("Product is not found.");
+			throw new ProductNotFoundException("Product " + productName + " is not found ");
+		}
+		
+		ProductMaster existingProduct = updateProduct.get();
+		
+		existingProduct.setProductName(productMaster.getProductName());
+		existingProduct.setActive(productMaster.isActive());
+		
+		ProductMaster saveProduct = this.productRepository.save(existingProduct);
+		
+		logger.info("Product '{}' updated successfully",saveProduct.getProductName());
+		
+		return saveProduct;
+	}
+
+	 
+	 
 	
 	
 }
